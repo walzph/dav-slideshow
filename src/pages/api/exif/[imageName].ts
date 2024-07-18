@@ -16,6 +16,20 @@ function parseDateTimeFromExif(data: {306: string, CreateDate: Date}): luxon.Dat
     return dt?.invalidReason === null ? dt : undefined;
 }
 
+function parseOrientationFromExif(data: {Orientation: string}): number {
+    // Map the orientation string to a corresponding numeric value
+    const orientationMap: { [key: string]: number } = {
+        'Normal': 1,
+        'Rotate 90 CW': 6,
+        'Rotate 180 CW': 3,
+        'Rotate 270 CW': 8,
+        'Flip Horizontal': 2,
+        'Flip Vertical': 4,
+        'Transpose': 5, // Flip Horizontal + Rotate 270 CW
+        'Transverse': 7  // Flip Vertical + Rotate 90 CW
+    };
+    return orientationMap[data.Orientation] ?? 1;
+}
 
 export default function handler(
   req: NextApiRequest,
@@ -40,8 +54,10 @@ export default function handler(
         return exifr.parse();
     }).then(exifrData=> {
         const date = parseDateTimeFromExif(exifrData);
+        const orientation = parseOrientationFromExif(exifrData);
         res.json({
             date: date?.toObject(),
+            orientation: orientation,
         });
     }).catch(ex => {
         console.error(`Failed to get exif data from dav`, ex);

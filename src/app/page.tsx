@@ -84,6 +84,46 @@ export default function Home() {
         };
     });
 
+    const fixOrientation = (imgData: string, orientation?: number): void => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = preloadImageRef.current!;
+        if (ctx) {
+            console.log('fixing orientation', orientation);
+            switch(orientation) {
+                case 6:
+                    canvas.width = img.naturalHeight;
+                    canvas.height = img.naturalWidth;
+                    ctx.rotate(90 * Math.PI / 180);
+                    ctx.translate(0, -canvas.width);
+                    break;
+                case 8:
+                    canvas.width = img.naturalHeight;
+                    canvas.height = img.naturalWidth;
+                    ctx.rotate(-90 * Math.PI / 180);
+                    ctx.translate(-canvas.height, 0);
+                    break;
+                case 3:
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    ctx.rotate(180 * Math.PI / 180);
+                    ctx.translate(-canvas.width, -canvas.height);
+                    break;
+                default:
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    break;
+            }
+            ctx.drawImage(img, 0, 0);
+            console.log('set transformed image');
+            console.log(orientation);
+            setCurrentImageSrc(canvas.toDataURL());
+        } else {
+            console.log('set normal image');
+            setCurrentImageSrc(imgData);
+        }
+    }
+
     // When a new image is selected, fetch it.
     useEffect(() => {
         if (!images || !preloadImageRef.current) {
@@ -96,15 +136,14 @@ export default function Home() {
         preloadImageRef.current.addEventListener("load", () => {
             console.log("Preloaded image loaded, fetching exif");
             fetch(nextImage.exif).then(req => req.json() as ExifApiResponse).then(data => {
+                fixOrientation(nextImage.img, data.orientation);
                 setExifData({
                     CreateDate: data.date && luxon.DateTime.fromObject(data.date),
                 });
             }).catch(ex => {
                 setExifData(null);
                 console.log("Couldn't load exif data", ex);
-            }).finally(() => {
-                setCurrentImageSrc(nextImage.img);
-            })
+            });
         }, { once: true });
         preloadImageRef.current.src = nextImage.img;
     }, [imageIndex, images]);

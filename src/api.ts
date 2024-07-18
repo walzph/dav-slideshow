@@ -7,6 +7,7 @@ export interface ImagesApiResponse {
 
 export interface ExifApiResponse {
     date?: luxon.ToObjectOutput;
+    orientation?: number;
 }
 
 export interface ErrorResponse {

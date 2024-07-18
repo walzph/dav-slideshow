@@ -189,9 +189,9 @@ export default function Home() {
         {exifData && <div className={styles.infobox}>
             {currentTime && <p className={styles.time}>
                 {currentTime.time}
-                <span className={styles.date}>{currentTime.date}</span>
+                {/* <span className={styles.date}>{currentTime.date}</span> */}
             </p>}
-            {exifData.CreateDate && <p className='takenDate'>Taken on {exifData.CreateDate?.toLocaleString(luxon.DateTime.DATE_FULL)}</p>}
+            {/* {exifData.CreateDate && <p className='takenDate'>Taken on {exifData.CreateDate?.toLocaleString(luxon.DateTime.DATE_FULL)}</p>} */}
         </div>}
     </main>;
 }
